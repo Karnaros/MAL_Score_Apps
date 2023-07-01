@@ -1,0 +1,5 @@
+{
+  "ConnectionStrings": {
+    "PostgreSQL": "" //database connection string
+  }
+}
