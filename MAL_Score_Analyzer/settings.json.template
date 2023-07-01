@@ -1,0 +1,7 @@
+{
+  "MalHeaders": {
+    "name": "" //name of MAL authorisation header
+    "value": "" //value of MAL authorisation header
+  },
+  "ApiUri": "" //base Uri for building links to heatmaps
+}
