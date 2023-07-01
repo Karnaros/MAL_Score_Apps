@@ -1,10 +1,18 @@
 using Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
-string connection = "Host=localhost;Port=5432;Database=mal-score-db;Username=postgres;Password=admin;";
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddJsonFile("sharedsettings.json", false, true);
+}
+else
+{
+    builder.Configuration.AddJsonFile("/run/secrets/shared_settings", false);
+}
 
 // Add services to the container.
 
@@ -14,7 +22,9 @@ builder.Services.AddControllers()
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<MalContext>(options => options.UseNpgsql(connection));
+builder.Services
+    .AddDbContext<MalContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
 
 var app = builder.Build();
 
@@ -22,6 +32,13 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "./src/static")),
+    RequestPath = "/api/static"
+});
 
 app.MapControllers();
 

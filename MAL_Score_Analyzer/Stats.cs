@@ -13,9 +13,12 @@ namespace MAL_Score_Analyzer
         /// have anime count more than certain threshold.
         /// </summary>
         /// <returns></returns>
-        static internal async Task CalcGenreStats(DbContextOptions dbOptions)
+        static internal async Task CalcGenreStats(DbContextOptions dbOptions, Uri apiUri)
         {
             using var context = new MalContext(dbOptions);
+
+            string basePath = "./src/static/";
+            Directory.CreateDirectory(basePath);
 
             var genres = context.Genres.ToList();
             var total = genres.FirstOrDefault(genre => genre.name == "Total");
@@ -53,7 +56,10 @@ namespace MAL_Score_Analyzer
                         .ToList();
 
                 if (scores.Count > 500)
-                    genre.heatMapFileName = DrawHeatMap(scores, genre.name);
+                    genre.heatMapUri = new Uri(
+                            apiUri,
+                            DrawHeatMap(scores, genre.name, basePath))
+                        .ToString();
 
                 scores.Sort();
 
@@ -65,11 +71,12 @@ namespace MAL_Score_Analyzer
         }
 
         /// <summary>
-        /// Generates and saves to filesystem score heatmap for <paramref name="genreName"/>
-        /// based on <paramref name="scores"/>.
+        /// Generates score heatmap for <paramref name="genreName"/>
+        /// based on <paramref name="scores"/>
+        /// and saves it to filesystem at <paramref name="basePath"/>
         /// </summary>
         /// <returns>Heatmap file name <see cref="string"/>.</returns>
-        static string DrawHeatMap(List<float> scores, string genreName)
+        static string DrawHeatMap(List<float> scores, string genreName, string basePath)
         {
             using SkiaBitmapExportContext bmp = new(400, 40, 1.0f);
             ICanvas canvas = bmp.Canvas;
@@ -104,7 +111,7 @@ namespace MAL_Score_Analyzer
             }
 
             string heatMapFileName = $"{genreName}.png";
-            bmp.WriteToFile(heatMapFileName);
+            bmp.WriteToFile(Path.Combine(basePath, heatMapFileName));
 
             return heatMapFileName;
         }

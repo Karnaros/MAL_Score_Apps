@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Files that may contain sensitive data
+*settings.json
+.env
+
 # User-specific files
 *.rsuser
 *.suo
@@ -361,3 +365,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Custom ignore
+*/src/static

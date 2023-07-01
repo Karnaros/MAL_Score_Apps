@@ -7,11 +7,9 @@ namespace Models
         public DbSet<Anime> AnimeList { get; set; }
         public DbSet<Genre> Genres { get; set; }
 
-        public MalContext(DbContextOptions options) : base(options) { }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public MalContext(DbContextOptions options) : base(options)
         {
-            optionsBuilder.LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name });
+            Database.EnsureCreated();
         }
     }
 
@@ -52,7 +50,7 @@ namespace Models
         public string name { get; set; } = null!;
         public float? mean { get; set; }
         public float? median { get; set; }
-        public string? heatMapFileName { get; set; }
+        public string? heatMapUri { get; set; }
         public List<Anime> anime { get; set; } = new();
     }
 

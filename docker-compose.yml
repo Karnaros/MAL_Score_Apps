@@ -1,0 +1,48 @@
+version: '3.4'
+
+services:
+  mal_score_analyzer:
+    image: ${DOCKER_REGISTRY-}malscoreanalyzer
+    build:
+      context: .
+      dockerfile: MAL_Score_Analyzer/Dockerfile
+    depends_on:
+      - database
+    secrets:
+      - analyzer_settings
+      - shared_settings
+    volumes:
+      - static_volume:/app/src/static
+
+  mal_score_api:
+    image: ${DOCKER_REGISTRY-}malscoreapi
+    build:
+      context: .
+      dockerfile: MAL_Score_API/Dockerfile  
+    depends_on:
+      - database  
+    secrets:
+      - shared_settings  
+    volumes:
+      - static_volume:/app/src/static
+    ports:
+      - 80:80
+
+  database:
+    container_name: database
+    image: postgres:15.2-alpine
+    env_file:
+      - ./.env
+    volumes:
+      - database_volume:/var/lib/postgresql/data 
+    restart: always
+
+secrets:
+  shared_settings:
+    file: ./Shared/sharedsettings.json
+  analyzer_settings:
+    file: ./MAL_Score_Analyzer/settings.json
+
+volumes:
+  database_volume:
+  static_volume:
