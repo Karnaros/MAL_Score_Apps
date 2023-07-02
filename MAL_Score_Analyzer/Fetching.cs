@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Models;
+using System.Net;
 using System.Text.Json;
 
 namespace MAL_Score_Analyzer
@@ -33,12 +34,9 @@ namespace MAL_Score_Analyzer
                 {
                     response = await FetchMalOne(client, offset, limit);
                 }
-                catch (HttpRequestException e) when (e.StatusCode == System.Net.HttpStatusCode.Forbidden)
-                {
-                    errorHandler(e);
-                    continue;
-                }
-                catch (JsonException e)
+                catch (Exception e) when 
+                ((e is HttpRequestException exception && exception.StatusCode == HttpStatusCode.Forbidden) || 
+                e is JsonException)
                 {
                     errorHandler(e);
                     continue;

@@ -38,16 +38,12 @@ namespace MAL_Score_Analyzer
 
             foreach (var genre in genres)
             {
-                IQueryable<Anime> queryBase;
+                IQueryable<Anime> queryBase = context.AnimeList
+                        .Where(anime => anime.genres.Contains(genre)); 
 
                 if (genre.name == "Total")
                 {
                     queryBase = context.AnimeList;
-                }
-                else
-                {
-                    queryBase = context.AnimeList
-                        .Where(anime => anime.genres.Contains(genre));
                 }
 
                 var scores = queryBase
@@ -64,10 +60,26 @@ namespace MAL_Score_Analyzer
                 scores.Sort();
 
                 genre.mean = scores.Average();
-                genre.median = scores.Count > 0 ? scores[(scores.Count / 2)] : null;
+                genre.median = CalcMedian(scores);
             }
 
             await context.SaveChangesAsync();
+        }
+
+        static float? CalcMedian(List<float> scores)
+        {
+            if (scores.Count == 0)
+                return null;
+            if(scores.Count%2==0)
+            {
+                var left = scores[(scores.Count / 2)];
+                var right = scores[(scores.Count / 2) + 1];
+                return (left + right)/2.0f;
+            }
+            else
+            {
+                return scores[(scores.Count / 2)];
+            }
         }
 
         /// <summary>
