@@ -9,4 +9,6 @@ Consists of two separate parts:
 ## Setup
 Database connection string should be provided at ./Shared/sharedsettings.json , as it is shown in ./Shared/sharedsettings.json.template .
 
+Database setup info is expected to be in ./.env file matching ./.env.template .
+
 MAL API authorisation header and base Uri for building links to heatmaps should be provided at ./MAL_Score_Analyzer/settings.json , as it is shown in ./MAL_Score_Analyzer/settings.json.template .
