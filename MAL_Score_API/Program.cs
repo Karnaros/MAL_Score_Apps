@@ -19,12 +19,14 @@ else
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services
-    .AddDbContext<MalContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
+    .AddDbContextPool<MalContext>(options =>
+    {
+        options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL"));
+        options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+    });
 
 var app = builder.Build();
 

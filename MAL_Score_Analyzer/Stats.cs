@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Graphics.Skia;
 using Models;
@@ -13,9 +14,9 @@ namespace MAL_Score_Analyzer
         /// have anime count more than certain threshold.
         /// </summary>
         /// <returns></returns>
-        static internal async Task CalcGenreStats(DbContextOptions dbOptions, Uri apiUri)
+        static internal async Task CalcGenreStats(PooledDbContextFactory<MalContext> dbFactory, Uri apiUri)
         {
-            using var context = new MalContext(dbOptions);
+            using var context = await dbFactory.CreateDbContextAsync();
 
             var basePath = "./src/static/";
             Directory.CreateDirectory(basePath);

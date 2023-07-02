@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore.Infrastructure;
 using Models;
 using System.Net;
 using System.Text.Json;
@@ -10,7 +10,7 @@ namespace MAL_Score_Analyzer
         /// <summary>
         /// Iteratively fetches MAL API to get data about all anime that has user score.
         /// </summary>
-        static internal async Task FetchAndSaveAll(DbContextOptions dbOptions, HttpClient client)
+        static internal async Task FetchAndSaveAll(PooledDbContextFactory<MalContext> dbFactory, HttpClient client)
         {
             var offset = 0;
             var limit = 500;
@@ -40,7 +40,7 @@ namespace MAL_Score_Analyzer
                 if (response.data.Length == 0)
                     break;
 
-                await DataBase.SaveResponse(dbOptions, response);
+                await DataBase.SaveResponse(dbFactory, response);
 
                 if (response.data.Last().node.mean is null)
                     break;

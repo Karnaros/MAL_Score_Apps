@@ -1,6 +1,8 @@
 ﻿using MAL_Score_Analyzer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
+using Models;
 
 ConfigurationBuilder configBuilder = new();
 
@@ -19,9 +21,11 @@ var config = configBuilder.Build();
 
 Uri apiUri = new(config.GetValue<string>("ApiUri")!);
 
-var dbOptions = new DbContextOptionsBuilder()
+var dbOptions = new DbContextOptionsBuilder<MalContext>()
     .UseNpgsql(config.GetConnectionString("PostgreSQL"))
     .Options;
+
+var dbFactory = new PooledDbContextFactory<MalContext>(dbOptions);
 
 using HttpClient client = new();
 client.DefaultRequestHeaders.Add(
@@ -29,6 +33,6 @@ client.DefaultRequestHeaders.Add(
     config.GetSection("MalHeaders")["value"]!);
 client.BaseAddress = new Uri("https://api.myanimelist.net/v2/anime/");
 
-await Fetching.FetchAndSaveAll(dbOptions, client);
+await Fetching.FetchAndSaveAll(dbFactory, client);
 
-await Stats.CalcGenreStats(dbOptions, apiUri);
+await Stats.CalcGenreStats(dbFactory, apiUri);

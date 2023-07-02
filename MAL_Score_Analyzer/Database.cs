@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Models;
 
 namespace MAL_Score_Analyzer
@@ -9,24 +10,25 @@ namespace MAL_Score_Analyzer
         /// Extracts anime data from <paramref name="response"/>
         /// object and saves it to database.
         /// </summary>
-        static internal async Task SaveResponse(DbContextOptions dbOptions, ResponseModel response)
+        static internal async Task SaveResponse(PooledDbContextFactory<MalContext> dbFactory, ResponseModel response)
         {
-            using var context = new MalContext(dbOptions);
+            using var context = await dbFactory.CreateDbContextAsync();
 
-            var data = response.data.Select(x => x.node);
+            var dataDict = response.data
+                .Select(x => x.node)
+                .ToDictionary(item => item.id);
 
-            Upsert(context, data);
+            Upsert(context, dataDict);
 
             await context.SaveChangesAsync();
         }
 
         /// <summary>
-        /// Adds or updates anime data from <paramref name="data"/>
+        /// Adds or updates anime data from <paramref name="dataDict"/>
         /// to the <paramref name="context"/>.
         /// </summary>
-        static void Upsert(MalContext context, IEnumerable<Anime> data)
+        static void Upsert(MalContext context, Dictionary<int, Anime> dataDict)
         {
-            var dataDict = data.ToDictionary(item => item.id);
             var genreComparer = new GenreComparer();
             var genres = context.Genres.ToList();
 
