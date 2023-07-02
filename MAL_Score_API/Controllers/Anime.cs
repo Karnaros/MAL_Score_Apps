@@ -21,7 +21,7 @@ namespace MAL_Score_API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Models.Anime>> Get(int id)
         {
-            Models.Anime? anime = await db.AnimeList
+            var anime = await db.AnimeList
                 .Include(a => a.genres)
                 .FirstOrDefaultAsync(x => x.id == id);
             if (anime == null)

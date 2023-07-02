@@ -21,7 +21,7 @@ namespace MAL_Score_API.Controllers
         [HttpGet("{name}")]
         public async Task<ActionResult<Genre>> Get(string name)
         {
-            Genre? genre = await db.Genres
+            var genre = await db.Genres
                 .FirstOrDefaultAsync(x => x.name == name);
             if (genre == null)
             {

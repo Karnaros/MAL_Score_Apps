@@ -62,7 +62,7 @@ namespace MAL_Score_Analyzer
             {
                 item.genres = item.genres.Select(x =>
                 {
-                    int i = genres.BinarySearch(x, comparer);
+                    var i = genres.BinarySearch(x, comparer);
                     if (i < 0)
                     {
                         i = ~i;

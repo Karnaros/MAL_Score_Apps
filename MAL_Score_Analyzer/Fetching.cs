@@ -12,52 +12,41 @@ namespace MAL_Score_Analyzer
         /// </summary>
         static internal async Task FetchAndSaveAll(DbContextOptions dbOptions, HttpClient client)
         {
-            int offset = 0;
-            int limit = 500;
-            int exceptionCount = 0;
-            int exceptionMaxTries = 3;
-
-            void errorHandler(Exception e)
-            {
-                if (exceptionCount >= exceptionMaxTries) throw e;
-                exceptionCount++;
-                Console.WriteLine(e.ToString());
-                Console.WriteLine("Possibly rate-limited, waiting...");
-                Thread.Sleep(1000 * exceptionCount);
-            }
+            var offset = 0;
+            var limit = 500;
+            var exceptionCount = 0;
+            var exceptionMaxTries = 3;
+            ResponseModel response;
 
             while (true)
             {
-                ResponseModel response;
-
                 try
                 {
                     response = await FetchMalOne(client, offset, limit);
                 }
-                catch (Exception e) when 
-                ((e is HttpRequestException exception && exception.StatusCode == HttpStatusCode.Forbidden) || 
+                catch (Exception e) when
+                ((e is HttpRequestException exception && exception.StatusCode == HttpStatusCode.Forbidden) ||
                 e is JsonException)
                 {
-                    errorHandler(e);
+                    if (exceptionCount >= exceptionMaxTries)
+                        throw;
+                    exceptionCount++;
+                    Console.WriteLine(e.ToString());
+                    Console.WriteLine("Possibly rate-limited, waiting...");
+                    await Task.Delay(1000 * exceptionCount);
                     continue;
                 }
 
                 if (response.data.Length == 0)
-                {
-                    offset = 0;
                     break;
-                }
 
                 await DataBase.SaveResponse(dbOptions, response);
 
                 if (response.data.Last().node.mean is null)
-                {
-                    offset = 0;
                     break;
-                }
 
                 offset += limit;
-                Thread.Sleep(500);
+                await Task.Delay(500);
             }
         }
 
@@ -67,12 +56,12 @@ namespace MAL_Score_Analyzer
         /// <returns>Response object containing list of requested anime.</returns>
         static async Task<ResponseModel> FetchMalOne(HttpClient client, int offset, int limit)
         {
-            string query = $"ranking?offset={offset}&ranking_type=all&limit={limit}&fields=id,title,mean,genres";
+            var query = $"ranking?offset={offset}&ranking_type=all&limit={limit}&fields=id,title,mean,genres";
             Console.WriteLine($"Fetching: {client.BaseAddress}{query}");
 
             var json = await client.GetByteArrayAsync(query);
 
-            ResponseModel response = JsonSerializer.Deserialize<ResponseModel>(json)!;
+            var response = JsonSerializer.Deserialize<ResponseModel>(json)!;
 
             return response;
         }

@@ -1,7 +1,7 @@
-﻿using Microsoft.Maui.Graphics.Skia;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Maui.Graphics;
+using Microsoft.Maui.Graphics.Skia;
 using Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace MAL_Score_Analyzer
 {
@@ -17,7 +17,7 @@ namespace MAL_Score_Analyzer
         {
             using var context = new MalContext(dbOptions);
 
-            string basePath = "./src/static/";
+            var basePath = "./src/static/";
             Directory.CreateDirectory(basePath);
 
             var genres = context.Genres.ToList();
@@ -38,8 +38,8 @@ namespace MAL_Score_Analyzer
 
             foreach (var genre in genres)
             {
-                IQueryable<Anime> queryBase = context.AnimeList
-                        .Where(anime => anime.genres.Contains(genre)); 
+                var queryBase = context.AnimeList
+                        .Where(anime => anime.genres.Contains(genre));
 
                 if (genre.name == "Total")
                 {
@@ -70,11 +70,11 @@ namespace MAL_Score_Analyzer
         {
             if (scores.Count == 0)
                 return null;
-            if(scores.Count%2==0)
+            if (scores.Count % 2 == 0)
             {
                 var left = scores[(scores.Count / 2)];
                 var right = scores[(scores.Count / 2) + 1];
-                return (left + right)/2.0f;
+                return (left + right) / 2.0f;
             }
             else
             {
@@ -91,8 +91,8 @@ namespace MAL_Score_Analyzer
         static string DrawHeatMap(List<float> scores, string genreName, string basePath)
         {
             using SkiaBitmapExportContext bmp = new(400, 40, 1.0f);
-            ICanvas canvas = bmp.Canvas;
-            int maxHue = 240;
+            var canvas = bmp.Canvas;
+            var maxHue = 240;
 
             canvas.FillColor = Color.FromHsv(maxHue, 100, 75);
             canvas.FillRectangle(0, 0, bmp.Width, bmp.Height);
@@ -122,7 +122,7 @@ namespace MAL_Score_Analyzer
                 canvas.DrawLine(x, 0, x, bmp.Height);
             }
 
-            string heatMapFileName = $"{genreName}.png";
+            var heatMapFileName = $"{genreName}.png";
             bmp.WriteToFile(Path.Combine(basePath, heatMapFileName));
 
             return heatMapFileName;
